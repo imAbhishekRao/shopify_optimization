@@ -1,0 +1,342 @@
+{% comment %}
+  Advanced Lazy Loading Implementation
+  This snippet provides aggressive lazy loading for all images and media
+{% endcomment %}
+
+<style>
+  /* Lazy loading styles */
+  .lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background: #f0f0f0;
+    position: relative;
+  }
+  
+  .lazy-image.loaded {
+    opacity: 1;
+  }
+  
+  .lazy-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+  
+  .lazy-image.loaded::before {
+    display: none;
+  }
+  
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* Optimize font loading */
+  @font-face {
+    font-family: 'GeneralSans';
+    font-display: swap;
+    src: url('{{ "GeneralSans-Regular.otf" | asset_url }}') format('opentype');
+  }
+  
+  @font-face {
+    font-family: 'GeneralSans';
+    font-weight: 500;
+    font-display: swap;
+    src: url('{{ "GeneralSans-Medium.otf" | asset_url }}') format('opentype');
+  }
+  
+  /* Reduce layout shift */
+  .aspect-ratio-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .aspect-ratio-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Optimize animations */
+  .optimized-animation {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  /* Reduce paint operations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+</style>
+
+<script>
+  // Advanced Lazy Loading Implementation
+  (function() {
+    'use strict';
+    
+    // Configuration
+    const config = {
+      rootMargin: '50px 0px',
+      threshold: 0.1,
+      imageSelector: 'img[data-src], img[data-lazy]',
+      iframeSelector: 'iframe[data-src]',
+      videoSelector: 'video[data-src]'
+    };
+    
+    // Lazy loading for images
+    function initLazyImages() {
+      if (!('IntersectionObserver' in window)) {
+        loadAllImages();
+        return;
+      }
+      
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            loadImage(img);
+            observer.unobserve(img);
+          }
+        });
+      }, {
+        rootMargin: config.rootMargin,
+        threshold: config.threshold
+      });
+      
+      document.querySelectorAll(config.imageSelector).forEach(img => {
+        imageObserver.observe(img);
+        img.classList.add('lazy-image');
+      });
+    }
+    
+    // Load individual image
+    function loadImage(img) {
+      const src = img.dataset.src || img.dataset.lazy;
+      if (!src) return;
+      
+      // Create new image to preload
+      const tempImg = new Image();
+      
+      tempImg.onload = function() {
+        img.src = src;
+        img.classList.add('loaded');
+        img.removeAttribute('data-src');
+        img.removeAttribute('data-lazy');
+      };
+      
+      tempImg.onerror = function() {
+        img.classList.add('loaded');
+        console.warn('Failed to load image:', src);
+      };
+      
+      tempImg.src = src;
+    }
+    
+    // Load all images (fallback)
+    function loadAllImages() {
+      document.querySelectorAll(config.imageSelector).forEach(img => {
+        loadImage(img);
+      });
+    }
+    
+    // Lazy loading for iframes
+    function initLazyIframes() {
+      if (!('IntersectionObserver' in window)) {
+        loadAllIframes();
+        return;
+      }
+      
+      const iframeObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const iframe = entry.target;
+            loadIframe(iframe);
+            observer.unobserve(iframe);
+          }
+        });
+      }, {
+        rootMargin: '100px 0px',
+        threshold: 0.1
+      });
+      
+      document.querySelectorAll(config.iframeSelector).forEach(iframe => {
+        iframeObserver.observe(iframe);
+      });
+    }
+    
+    // Load iframe
+    function loadIframe(iframe) {
+      const src = iframe.dataset.src;
+      if (!src) return;
+      
+      iframe.src = src;
+      iframe.removeAttribute('data-src');
+    }
+    
+    // Load all iframes (fallback)
+    function loadAllIframes() {
+      document.querySelectorAll(config.iframeSelector).forEach(iframe => {
+        loadIframe(iframe);
+      });
+    }
+    
+    // Optimize CSS loading
+    function optimizeCSSLoading() {
+      const nonCriticalCSS = [
+        '{{ "custom.css" | asset_url }}',
+        '{{ "gp-global.css" | asset_url }}'
+      ];
+      
+      nonCriticalCSS.forEach(href => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.media = 'print';
+        link.onload = function() {
+          this.media = 'all';
+        };
+        document.head.appendChild(link);
+      });
+    }
+    
+    // Optimize JavaScript loading
+    function optimizeJSLoading() {
+      const deferredScripts = [
+        '{{ "custom.js" | asset_url }}',
+        '{{ "flickity.js" | asset_url }}',
+        '{{ "photoswipe.js" | asset_url }}'
+      ];
+      
+      deferredScripts.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.defer = true;
+        document.head.appendChild(script);
+      });
+    }
+    
+    // Optimize third-party scripts
+    function optimizeThirdPartyScripts() {
+      const thirdPartyScripts = [
+        {
+          src: 'https://a.klaviyo.com/media/js/onsite/onsite.js',
+          async: true,
+          defer: false
+        },
+        {
+          src: 'https://static.hotjar.com/c/hotjar-5011132.js?sv=6',
+          async: true,
+          defer: false
+        }
+      ];
+      
+      // Load after page is interactive
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          thirdPartyScripts.forEach(scriptConfig => {
+            const script = document.createElement('script');
+            script.src = scriptConfig.src;
+            if (scriptConfig.async) script.async = true;
+            if (scriptConfig.defer) script.defer = true;
+            document.head.appendChild(script);
+          });
+        }, 2000); // Delay by 2 seconds
+      });
+    }
+    
+    // Optimize fonts
+    function optimizeFonts() {
+      if ('fonts' in document) {
+        Promise.all([
+          document.fonts.load('1em GeneralSans'),
+          document.fonts.load('500 1em GeneralSans')
+        ]).then(() => {
+          document.documentElement.classList.add('fonts-loaded');
+        });
+      }
+    }
+    
+    // Optimize images with WebP support
+    function optimizeImageFormats() {
+      const images = document.querySelectorAll('img[data-webp]');
+      
+      images.forEach(img => {
+        const webpSrc = img.dataset.webp;
+        const originalSrc = img.src;
+        
+        // Check WebP support
+        const webpSupported = document.createElement('canvas')
+          .toDataURL('image/webp')
+          .indexOf('data:image/webp') === 0;
+        
+        if (webpSupported && webpSrc) {
+          img.src = webpSrc;
+        }
+      });
+    }
+    
+    // Reduce layout shift
+    function preventLayoutShift() {
+      const images = document.querySelectorAll('img');
+      
+      images.forEach(img => {
+        if (!img.complete) {
+          img.style.opacity = '0';
+          img.addEventListener('load', function() {
+            this.style.opacity = '1';
+          });
+        }
+      });
+    }
+    
+    // Optimize animations
+    function optimizeAnimations() {
+      const animatedElements = document.querySelectorAll('.product-item, .collection-item, .hero__image');
+      
+      animatedElements.forEach(element => {
+        element.classList.add('optimized-animation', 'gpu-accelerated');
+      });
+    }
+    
+    // Initialize all optimizations
+    function init() {
+      // Run immediately
+      initLazyImages();
+      initLazyIframes();
+      optimizeFonts();
+      preventLayoutShift();
+      optimizeAnimations();
+      
+      // Run after DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          optimizeImageFormats();
+        });
+      } else {
+        optimizeImageFormats();
+      }
+      
+      // Run after page load
+      window.addEventListener('load', function() {
+        optimizeCSSLoading();
+        optimizeJSLoading();
+        optimizeThirdPartyScripts();
+      });
+    }
+    
+    // Start optimizations
+    init();
+    
+  })();
+</script> 

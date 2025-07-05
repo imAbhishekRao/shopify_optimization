@@ -20,14 +20,14 @@
           <div class="TrustIconsWithText">
             <div class="TrustIconsWithText--inner">
               {% if block.settings.image1 != blank %}
-                <img src="{{ block.settings.image1 | img_url: '120x' }}">
+                <img data-src="{{ block.settings.image1 | img_url: '120x' }}" class="lazy-image">
               {% endif %}
               {{ block.settings.html }}
               <span>{{ block.settings.text1 }}</span>
             </div>
             <div class="TrustIconsWithText--inner">
               {% if block.settings.image2 != blank %}
-                <img src="{{ block.settings.image2 | img_url: '120x' }}">
+                <img data-src="{{ block.settings.image2 | img_url: '120x' }}" class="lazy-image">
               {% endif %}
               {{ block.settings.html2 }}
               <span>{{ block.settings.text2 }}</span>
@@ -94,10 +94,10 @@
         <div class="CustomerTestimonial">
           <div class="CustomerTestimonialImg">
             {% if block.settings.image1 != blank %}
-              <img src="{{ block.settings.image1 | img_url: '80x' }}">
+              <img data-src="{{ block.settings.image1 | img_url: '80x' }}" class="lazy-image">
             {% endif %}
             {% if block.settings.image2 != blank %}
-              <img src="{{ block.settings.image2 | img_url: '80x' }}">
+              <img data-src="{{ block.settings.image2 | img_url: '80x' }}" class="lazy-image">
             {% endif %}
           </div>
           <div class="CustomerTestimonialtext">
@@ -107,7 +107,7 @@
       
         {%- when 'bulletPoints' -%}
         <div class="bulletPointsBlocks">
-          <img class="bulletPointsIcon" src="{{ block.settings.icon | img_url:'master' }}">
+          <img class="bulletPointsIcon lazy-image" data-src="{{ block.settings.icon | img_url:'master' }}">
           <span class="bulletPointsContent">{{ block.settings.text }}</span>
         </div>
 
@@ -816,7 +816,7 @@
         {%- endif -%}
 
         <div js-new-variant-registration-form class="new-variant-registration-form {% unless product.selected_or_first_available_variant.metafields.custom.new_variant_not_for_sale == true %}hide{% endunless %}">
-          <div class="{% if product.metafields.custom.klaviyo_form_id != blank %}{{ product.metafields.custom.klaviyo_form_id  }}{% else %}klaviyo-form-QYRkyn{% endif %}"></div>
+          <div {% if product.metafields.custom.klaviyo_form_id != blank %}{{ product.metafields.custom.klaviyo_form_id  }}{% else %}klaviyo-form-QYRkyn{% endif %}></div>
         </div>
 
         {%- if template.suffix != 'quick-buy-popover' -%}

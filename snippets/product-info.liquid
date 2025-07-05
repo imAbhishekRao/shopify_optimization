@@ -8,7 +8,7 @@
         {% when 'couponCode' %}
           <div class="couponCode couponCode--fordesktopOnly new-big-redesign-ab-test-a">
             <div class="couponCode--inner 1" data-coupon="{{ block.settings.coupon | replace : "<tc>" , "" | replace : "</tc>" , "" }}">
-              <img src="{{ block.settings.image | img_url: '100x' }}" width="100%" height="100%">
+              <img data-src="{{ block.settings.image | img_url: '100x' }}" width="100%" height="100%" class="lazy-image">
               <span>{{ block.settings.text }}</span>
             </div>
             <span class="couponCode--message">{{ block.settings.message }}</span>
