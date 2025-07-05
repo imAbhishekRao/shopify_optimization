@@ -1,0 +1,152 @@
+{% comment %}
+  Performance Optimization Snippet
+  This snippet contains critical performance optimizations for the theme
+{% endcomment %}
+
+{% comment %} Critical CSS for above-the-fold content {% endcomment %}
+<style>
+  /* Critical CSS for immediate rendering */
+  .loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(var(--text-color), 0.1);
+    z-index: 9999;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  
+  .loading-bar.is-loading {
+    transform: scaleX(1);
+  }
+  
+  /* Optimize font loading */
+  .font-loading {
+    font-display: swap;
+  }
+  
+  /* Reduce layout shift */
+  .aspect-ratio {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .aspect-ratio > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Optimize images */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Reduce paint operations */
+  .product-item,
+  .collection-item {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  /* Optimize animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+
+{% comment %} Resource hints for external domains {% endcomment %}
+{% if request.page_type == 'index' %}
+  <link rel="preload" href="{{ 'theme.css' | asset_url }}" as="style">
+  <link rel="preload" href="{{ 'theme.js' | asset_url }}" as="script">
+{% endif %}
+
+{% comment %} Optimize third-party script loading {% endcomment %}
+<script>
+  // Defer non-critical scripts
+  function loadDeferredScripts() {
+    const deferredScripts = [
+      'https://a.klaviyo.com/media/js/onsite/onsite.js',
+      'https://static.hotjar.com/c/hotjar-5011132.js?sv=6'
+    ];
+    
+    deferredScripts.forEach(src => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      document.head.appendChild(script);
+    });
+  }
+  
+  // Load deferred scripts after page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadDeferredScripts);
+  } else {
+    loadDeferredScripts();
+  }
+  
+  // Optimize image loading
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+            observer.unobserve(img);
+          }
+        }
+      });
+    });
+    
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      imageObserver.observe(img);
+    });
+  }
+  
+  // Optimize CSS loading
+  function loadCSS(href) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+  
+  // Load non-critical CSS after page load
+  window.addEventListener('load', () => {
+    // Load any additional CSS files here if needed
+  });
+</script>
+
+{% comment %} Optimize font loading {% endcomment %}
+<link rel="preload" href="https://use.typekit.net/vkt4lzq.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://use.typekit.net/vkt4lzq.css"></noscript>
+
+{% comment %} Service Worker for caching {% endcomment %}
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('SW registered: ', registration);
+        })
+        .catch(registrationError => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    });
+  }
+</script> 
