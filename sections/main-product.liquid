@@ -978,3 +978,12 @@ document.querySelectorAll('.VariantID--Selected').forEach((inp) => {
 });
   
 </script>
+<script>
+  document.querySelector('[name="add"]')?.addEventListener('click', function() {
+    dataLayer.push({
+      event: 'add_to_cart',
+      product_id: '{{ product.id }}',
+      user_id: '{{ customer.email | sha256 }}' || 'unknown'
+    });
+  });
+</script>
