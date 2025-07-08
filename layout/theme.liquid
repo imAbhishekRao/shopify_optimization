@@ -6,7 +6,7 @@
     {%- assign direction = 'rtl' -%}
 {%- endcase -%}
 <html class="no-js" lang="{{ request.locale.iso_code }}" dir="{{ direction }}">
-  <head>
+  <head>{{ 'bss-hide-variant.css' | asset_url | stylesheet_tag }}
   {% render 'replo-head' %}
   {% render 'performance-optimizer' %}
   {% render 'advanced-lazy-loading' %}
