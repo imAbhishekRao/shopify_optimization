@@ -534,14 +534,3 @@
     {%- endif -%}
   </div>
 </product-item>
-
-<script>
-  // Triggered on wishlist button click
-  function addToWishlist(productId) {
-    dataLayer.push({
-      event: 'add_to_wishlist',
-      product_id: productId,
-      user_id: '{{ customer.email | sha256 }}' || 'unknown'
-    });
-  }
-</script>

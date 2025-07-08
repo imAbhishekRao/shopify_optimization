@@ -826,16 +826,3 @@ var updateProductMedia = (variantId) => {
 		}
 	});
 }
-
-document.querySelector('#SizeSelector')?.addEventListener('change', function(e) {
-  var size = e.target.value;
-  if (size !== '') {
-    dataLayer.push({
-      event: 'select_product_size',
-      product_size: size,
-      user_id: '{{ customer.email | sha256 }}' || 'unknown'
-    });
-  }
-});
-
-// RTB House tracking code changes applied

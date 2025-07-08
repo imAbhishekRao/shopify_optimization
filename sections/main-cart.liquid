@@ -419,20 +419,6 @@
   </div>
 </section>
 
-<script>
-  var cartProductIDs = [
-    {% for item in cart.items %}
-      '{{ item.product.id }}'{% unless forloop.last %}, {% endunless %}
-    {% endfor %}
-  ];
-
-  dataLayer.push({
-    event: 'basket_status',
-    cart_product_ids: cartProductIDs,
-    user_id: '{{ customer.email | sha256 }}' || 'unknown'
-  });
-</script>
-
 {% schema %}
 {
   "name": "Cart",

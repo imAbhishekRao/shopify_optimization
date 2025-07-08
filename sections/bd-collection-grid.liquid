@@ -49,13 +49,6 @@
   </div>
 </div>
 
-<script>
-  dataLayer.push({
-    event: 'new_products_view',
-    user_id: '{{ customer.email | sha256 }}' || 'unknown'
-  });
-</script>
-
 {%- schema %}
 {
   "name": "BD collection grid",
